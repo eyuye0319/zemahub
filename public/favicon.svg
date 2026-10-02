@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4a1521"/>
+      <stop offset="1" stop-color="#1c050a"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <rect x="1.5" y="1.5" width="61" height="61" rx="12.5" fill="none" stroke="#d4af37" stroke-opacity="0.7" stroke-width="2"/>
+  <!-- Lalibela cross (same design as the navbar logo), thickened to stay legible at 16-32px -->
+  <g transform="translate(7 7) scale(0.78)" fill="#e5c158" stroke="#e5c158" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="27" y="4" width="10" height="56" rx="2" stroke="none"/>
+    <rect x="8" y="19" width="48" height="10" rx="2" stroke="none"/>
+    <path d="M24 8 L32 2 L40 8 L32 14 Z M48 16 L56 24 L48 32 L40 24 Z M8 24 L16 16 L24 24 L16 32 Z M24 40 L32 48 L40 40 L32 32 Z M20 52 L32 62 L44 52 L32 42 Z" fill="none" stroke-width="3.4"/>
+    <circle cx="32" cy="24" r="6" fill="#4a1521" stroke-width="2.6"/>
+    <circle cx="32" cy="24" r="2" stroke="none"/>
+  </g>
+</svg>
