@@ -18,7 +18,25 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.wubgzer.zemahub"
+      "package": "com.wubgzer.zemahub",
+      "versionCode": 1,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "zemahub-orthodox.onrender.com",
+              "pathPrefix": "/watch"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -27,12 +45,22 @@
       "expo-router",
       "expo-status-bar",
       "expo-secure-store",
-      "expo-image"
+      "expo-image",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#20050B",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain"
+        }
+      ]
     ],
     "scheme": "zemahub",
     "backgroundColor": "#20050B",
     "extra": {
       "apiUrl": "https://zemahub-orthodox.onrender.com"
-    }
+    },
+    "description": "Ethiopian Orthodox Tewahedo mezmur and spiritual films in Amharic and English."
   }
 }

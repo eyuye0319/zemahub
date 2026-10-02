@@ -11,6 +11,7 @@ interface AuthContextValue {
   register: (name: string, email: string, password: string) => Promise<PublicUser>;
   logout: () => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  deleteAccount: (password: string) => Promise<void>;
   // Opens the sign-in modal from anywhere (e.g. "sign in to comment").
   authModalOpen: boolean;
   openAuthModal: (mode?: AuthModalMode) => void;
@@ -18,7 +19,7 @@ interface AuthContextValue {
   authModalMode: AuthModalMode;
 }
 
-export type AuthModalMode = 'login' | 'register' | 'password';
+export type AuthModalMode = 'login' | 'register' | 'password' | 'delete';
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -71,6 +72,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await api('/api/auth/change-password', { method: 'POST', body: { currentPassword, newPassword } });
   }, []);
 
+  const deleteAccount = useCallback(async (password: string) => {
+    await api('/api/me', { method: 'DELETE', body: { password } });
+    setToken(null);
+    setUser(null);
+  }, []);
+
   const openAuthModal = useCallback((mode: AuthModalMode = 'login') => {
     setAuthModalMode(mode);
     setAuthModalOpen(true);
@@ -88,6 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         register,
         logout,
         changePassword,
+        deleteAccount,
         authModalOpen,
         openAuthModal,
         closeAuthModal,

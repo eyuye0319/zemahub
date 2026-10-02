@@ -27,6 +27,9 @@ const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
+// Render (and most hosts) put a proxy in front of the app: trust it so req.ip and req.protocol
+// reflect the real visitor (per-visitor rate limits, https links in share previews).
+app.set("trust proxy", 1);
 app.use(express.json({ limit: "1mb" }));
 
 // ---------------- DATABASE ---------------- //
@@ -300,6 +303,24 @@ app.post("/api/auth/change-password", authRateLimit, requireAuth, (req: AuthedRe
   Object.assign(user, hashPassword(newPassword));
   const currentHash = hashToken(req.token!);
   db.sessions = db.sessions.filter(s => s.userId !== user.id || s.tokenHash === currentHash);
+  saveDB(db);
+  res.json({ success: true });
+});
+
+// Users can delete their own account (required by Google Play). Removes the account, its sessions and comments.
+app.delete("/api/me", authRateLimit, requireAuth, (req: AuthedRequest, res) => {
+  const user = req.user!;
+  if (!verifyPassword(user, String(req.body?.password || ""))) {
+    res.status(401).json({ error: "Password is incorrect." });
+    return;
+  }
+  if (user.role === "admin" && db.users.filter(u => u.role === "admin").length === 1) {
+    res.status(400).json({ error: "You are the only admin. Make another user an admin before deleting this account." });
+    return;
+  }
+  db.users = db.users.filter(u => u.id !== user.id);
+  db.sessions = db.sessions.filter(s => s.userId !== user.id);
+  db.comments = db.comments.filter(c => c.userId !== user.id);
   saveDB(db);
   res.json({ success: true });
 });
@@ -900,20 +921,46 @@ app.post("/api/admin/reset", requireAdmin, (req, res) => {
   res.json({ message: "Catalog reset to authentic seed data successfully" });
 });
 
+// ---------------- PUBLIC PAGES ---------------- //
+
+// Android App Links: lets links to /watch/... open in the ZemaHub app. ANDROID_SHA256_FINGERPRINTS holds the
+// app signing certificate fingerprint(s), comma-separated (from `eas credentials -p android` / Play Console).
+app.get("/.well-known/assetlinks.json", (req, res) => {
+  const fingerprints = (process.env.ANDROID_SHA256_FINGERPRINTS || "").split(",").map(f => f.trim()).filter(Boolean);
+  res.json(fingerprints.length ? [{
+    relation: ["delegate_permission/common.handle_all_urls"],
+    target: { namespace: "android_app", package_name: "com.wubgzer.zemahub", sha256_cert_fingerprints: fingerprints }
+  }] : []);
+});
+
+// Privacy policy (linked from the website footer, the app and the Google Play listing).
+app.get("/privacy", (req, res) => {
+  const dir = process.env.NODE_ENV === "production" ? "dist" : "public";
+  res.sendFile(path.join(process.cwd(), dir, "privacy.html"));
+});
+
 // ---------------- SHARE PREVIEWS (Open Graph) ---------------- //
 
 const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-// Shared links look like /?type=mezmur&id=... ; give link previews (Telegram, WhatsApp, Facebook) the item's title and thumbnail.
+// Shared links look like /watch/mezmur/<id> (older ones: /?type=mezmur&id=...).
+function shareTarget(req: Request) {
+  const match = req.path.match(/^\/watch\/(mezmur|film)\/([^/]+)\/?$/);
+  if (match) return { type: match[1], id: decodeURIComponent(match[2]) };
+  return { type: String(req.query.type || ""), id: String(req.query.id || "") };
+}
+
+// Give link previews (Telegram, WhatsApp, Facebook) the shared item's title and thumbnail.
 function injectShareMeta(html: string, req: Request) {
-  const media = findMedia(String(req.query.type || ""), String(req.query.id || ""));
+  const target = shareTarget(req);
+  const media = findMedia(target.type, target.id);
   if (!media) return html;
   const title = escapeHtml(`${media.titleAmharic} — ${media.titleEnglish} | ZemaHub`);
   const description = escapeHtml(media.descriptionEnglish || media.descriptionAmharic || "");
   const url = escapeHtml(`${req.protocol}://${req.get("host")}${req.originalUrl}`);
   const tags = [
-    `<meta property="og:type" content="${req.query.type === "film" ? "video.movie" : "music.song"}" />`,
+    `<meta property="og:type" content="${target.type === "film" ? "video.movie" : "music.song"}" />`,
     `<meta property="og:url" content="${url}" />`,
     `<meta property="og:image" content="${escapeHtml(media.thumbnailUrl)}" />`,
     `<meta name="twitter:card" content="summary_large_image" />`
@@ -938,8 +985,8 @@ async function startServer() {
       server: { middlewareMode: true },
       appType: "spa",
     });
-    app.get("/", async (req, res, next) => {
-      if (!req.query.id) return next();
+    app.get(["/", "/watch/:type/:id"], async (req, res, next) => {
+      if (!findMedia(shareTarget(req).type, shareTarget(req).id)) return next();
       try {
         const raw = fs.readFileSync(path.join(process.cwd(), "index.html"), "utf-8");
         const html = await vite.transformIndexHtml(req.originalUrl, raw);

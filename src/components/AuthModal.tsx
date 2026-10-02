@@ -1,6 +1,6 @@
 // src/components/AuthModal.tsx
 import React, { useEffect, useState } from 'react';
-import { X, AlertCircle, LogIn, UserPlus, KeyRound, Check } from 'lucide-react';
+import { X, AlertCircle, LogIn, UserPlus, KeyRound, Check, Trash2 } from 'lucide-react';
 import { Language } from '../types';
 import { translations } from '../i18n/translations';
 import { useAuth, AuthModalMode } from '../context/AuthContext';
@@ -11,7 +11,7 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ currentLang }: AuthModalProps) {
-  const { authModalOpen, authModalMode, closeAuthModal, login, register, changePassword } = useAuth();
+  const { authModalOpen, authModalMode, closeAuthModal, login, register, changePassword, deleteAccount } = useAuth();
   const [mode, setMode] = useState<AuthModalMode>(authModalMode);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -38,6 +38,22 @@ export default function AuthModal({ currentLang }: AuthModalProps) {
   const t = translations[currentLang];
   const isRegister = mode === 'register';
   const isPasswordChange = mode === 'password';
+  const isDelete = mode === 'delete';
+
+  const handleDelete = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSubmitting(true);
+    try {
+      await deleteAccount(password);
+      setPassword('');
+      closeAuthModal();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,12 +119,43 @@ export default function AuthModal({ currentLang }: AuthModalProps) {
           <div className="text-center space-y-2">
             <EthiopianCross size={36} className="text-gold-400 mx-auto" />
             <h3 className="font-serif font-bold text-xl text-gold-300">
-              {isPasswordChange ? t.authChangePassword : isRegister ? t.authRegisterTitle : t.authSignInTitle}
+              {isDelete ? t.authDeleteAccount : isPasswordChange ? t.authChangePassword : isRegister ? t.authRegisterTitle : t.authSignInTitle}
             </h3>
-            {!isPasswordChange && <p className="text-xs text-parchment-300/80">{t.authSubtitle}</p>}
+            {!isPasswordChange && !isDelete && <p className="text-xs text-parchment-300/80">{t.authSubtitle}</p>}
           </div>
 
-          {isPasswordChange ? (
+          {isDelete ? (
+            <form onSubmit={handleDelete} className="space-y-3">
+              <p className="text-xs text-rose-200 bg-rose-950/50 border border-rose-600/40 rounded-xl p-3 leading-relaxed">
+                {t.authDeleteWarning}
+              </p>
+              <div className="space-y-1">
+                <label className="text-[11px] text-parchment-300 font-medium">{t.authPassword}</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={inputClass}
+                  autoComplete="current-password"
+                  required
+                />
+              </div>
+              {error && (
+                <div className="flex items-center gap-2 p-3 bg-rose-950/60 border border-rose-600/40 rounded-xl text-xs text-rose-300">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full py-3 bg-rose-700 hover:bg-rose-600 disabled:opacity-60 text-white font-bold text-sm rounded-xl shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>{submitting ? t.authPleaseWait : t.authDeleteConfirm}</span>
+              </button>
+            </form>
+          ) : isPasswordChange ? (
             <form onSubmit={handleChangePassword} className="space-y-3">
               {[
                 [t.authCurrentPassword, password, setPassword, 'current-password'],

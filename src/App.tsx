@@ -131,18 +131,20 @@ export default function App() {
     return { mezmurs: initialMezmurs, films: initialFilms };
   };
 
-  // Shared links look like /?type=mezmur&id=... — open that item once the catalog has loaded.
+  // Shared links look like /watch/mezmur/<id> (older ones: /?type=mezmur&id=...) — open that item once the catalog has loaded.
   const deepLinkHandled = useRef(false);
   useEffect(() => {
     loadData().then(({ mezmurs: allMezmurs, films: allFilms }) => {
       if (deepLinkHandled.current) return;
       deepLinkHandled.current = true;
       const params = new URLSearchParams(window.location.search);
-      const id = params.get('id');
-      if (params.get('type') === 'mezmur') {
+      const match = window.location.pathname.match(/^\/watch\/(mezmur|film)\/([^/]+)/);
+      const type = match ? match[1] : params.get('type');
+      const id = match ? decodeURIComponent(match[2]) : params.get('id');
+      if (type === 'mezmur') {
         const item = allMezmurs.find(m => m.id === id);
         if (item) openMedia(item, 'mezmur', allMezmurs);
-      } else if (params.get('type') === 'film') {
+      } else if (type === 'film') {
         const item = allFilms.find(f => f.id === id);
         if (item) openMedia(item, 'film', allFilms);
       }
@@ -158,7 +160,7 @@ export default function App() {
       ? (pool as Mezmur[]).filter(m => m.id !== item.id && (m.category === item.category || m.singer === (item as Mezmur).singer))
       : (pool as SpiritualFilm[]).filter(f => f.id !== item.id && (f.category === item.category || f.director === (item as SpiritualFilm).director));
     setRelatedItems(rel.slice(0, 4));
-    window.history.replaceState(null, '', `/?type=${type}&id=${encodeURIComponent(item.id)}`);
+    window.history.replaceState(null, '', `/watch/${type}/${encodeURIComponent(item.id)}`);
     fetch(`/api/${type === 'mezmur' ? 'mezmur' : 'films'}/${item.id}/view`, { method: 'POST' }).catch(() => {});
   };
 

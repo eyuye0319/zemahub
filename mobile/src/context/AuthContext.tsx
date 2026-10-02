@@ -10,6 +10,7 @@ interface AuthContextValue {
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  deleteAccount: (password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -59,9 +60,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await api('/api/auth/change-password', { method: 'POST', body: { currentPassword, newPassword } });
   }, []);
 
+  const deleteAccount = useCallback(async (password: string) => {
+    await api('/api/me', { method: 'DELETE', body: { password } });
+    await setToken(null);
+    setUser(null);
+  }, []);
+
   return (
     <AuthContext.Provider
-      value={{ user, isAdmin: user?.role === 'admin', loading, login, register, logout, changePassword }}
+      value={{ user, isAdmin: user?.role === 'admin', loading, login, register, logout, changePassword, deleteAccount }}
     >
       {children}
     </AuthContext.Provider>

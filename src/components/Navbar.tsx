@@ -1,7 +1,7 @@
 // src/components/Navbar.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Heart, Shield, Menu, X, Music2, Film, Info, Compass, User, LogOut, ChevronRight, LogIn, UserPlus, KeyRound 
+  Heart, Shield, Menu, X, Music2, Film, Info, Compass, User, LogOut, ChevronRight, LogIn, UserPlus, KeyRound, Trash2 
 } from 'lucide-react';
 import { Language, Mezmur, SpiritualFilm } from '../types';
 import { translations } from '../i18n/translations';
@@ -278,6 +278,17 @@ export default function Navbar({
                       >
                         <KeyRound className="w-3.5 h-3.5 text-gold-400" />
                         <span>{t.authChangePassword}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          openAuthModal('delete');
+                        }}
+                        className="w-full px-3 py-2 rounded-xl text-left hover:bg-burgundy-900/80 transition-all flex items-center gap-2 text-xs text-parchment-300 hover:text-rose-300 cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>{t.authDeleteAccount}</span>
                       </button>
                       <button
                         type="button"

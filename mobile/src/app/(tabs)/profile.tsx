@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -12,12 +12,34 @@ import { Button, Field } from '../../components/ui';
 
 export default function ProfileScreen() {
   const { t, lang, setLang } = useLanguage();
-  const { user, isAdmin, logout, changePassword } = useAuth();
+  const { user, isAdmin, logout, changePassword, deleteAccount } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+
+  const confirmDelete = () =>
+    Alert.alert(t.deleteConfirmTitle, t.deleteWarning, [
+      { text: t.cancel, style: 'cancel' },
+      {
+        text: t.deleteConfirm,
+        style: 'destructive',
+        onPress: async () => {
+          setDeleteError('');
+          try {
+            await deleteAccount(deletePassword);
+            setDeletePassword('');
+            setShowDelete(false);
+          } catch (err) {
+            setDeleteError(err instanceof Error ? err.message : String(err));
+          }
+        }
+      }
+    ]);
 
   const submitPassword = async () => {
     setSaving(true);
@@ -93,8 +115,25 @@ export default function ProfileScreen() {
             ) : null}
 
             <Button title={t.signOut} variant="danger" onPress={logout} />
+
+            <Pressable onPress={() => setShowDelete(!showDelete)} style={styles.deleteToggle}>
+              <Ionicons name="trash-outline" size={16} color={colors.danger} />
+              <Text style={styles.deleteToggleText}>{t.deleteAccount}</Text>
+            </Pressable>
+            {showDelete ? (
+              <View style={styles.deleteBox}>
+                <Text style={styles.deleteWarning}>{t.deleteWarning}</Text>
+                <Field label={t.password} value={deletePassword} onChangeText={setDeletePassword} secureTextEntry />
+                {deleteError ? <Text style={{ color: colors.danger }}>{deleteError}</Text> : null}
+                <Button title={t.deleteAccount} variant="danger" onPress={confirmDelete} disabled={!deletePassword} />
+              </View>
+            ) : null}
           </>
         ) : null}
+
+        <Pressable onPress={() => Linking.openURL(`${API_URL}/privacy`)} style={{ paddingVertical: 8 }}>
+          <Text style={styles.link}>{t.privacyPolicy}</Text>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
@@ -160,5 +199,17 @@ const styles = StyleSheet.create({
     borderColor: colors.border
   },
   rowButtonText: { flex: 1, color: colors.text, fontWeight: '700' },
+  deleteToggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 8 },
+  deleteToggleText: { color: colors.danger, fontSize: 13, fontWeight: '600' },
+  deleteBox: {
+    gap: 12,
+    padding: 14,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: 'rgba(248,113,113,0.4)',
+    backgroundColor: 'rgba(127,29,29,0.25)'
+  },
+  deleteWarning: { color: '#fecaca', fontSize: 13, lineHeight: 19 },
+  link: { color: colors.gold400, textAlign: 'center', textDecorationLine: 'underline', fontSize: 13 },
   passwordBox: { gap: 12, padding: 14, borderRadius: radius.md, backgroundColor: colors.surface }
 });

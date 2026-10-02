@@ -195,6 +195,10 @@ export default function Footer({ currentLang, onLanguageChange, onNavigate }: Fo
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-parchment-400">
           <p>
             © {new Date().getFullYear()} {currentLang === 'am' ? 'ዜማሀብ' : 'ZemaHub'}. {t.allRightsReserved}.
+            {' '}
+            <a href="/privacy" className="underline hover:text-gold-300">
+              {currentLang === 'am' ? 'የግላዊነት ፖሊሲ' : 'Privacy Policy'}
+            </a>
           </p>
 
           {/* Explicit Developer Attribution */}

@@ -59,4 +59,4 @@ export async function api<T = any>(path: string, options: { method?: string; bod
 }
 
 export const shareUrlFor = (type: 'mezmur' | 'film', id: string) =>
-  `${API_URL}/?type=${type}&id=${encodeURIComponent(id)}`;
+  `${API_URL}/watch/${type}/${encodeURIComponent(id)}`;

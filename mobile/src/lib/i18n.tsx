@@ -74,6 +74,11 @@ const strings = {
     currentPassword: 'የአሁኑ የይለፍ ቃል',
     newPassword: 'አዲስ የይለፍ ቃል',
     passwordChanged: 'የይለፍ ቃልዎ ተቀይሯል።',
+    deleteAccount: 'መለያዬን አጥፋ',
+    deleteWarning: 'መለያዎ፣ አስተያየቶችዎና የተወደዱ ዝርዝርዎ እስከመጨረሻው ይጠፋሉ። ይህ ሊመለስ አይችልም።',
+    deleteConfirmTitle: 'መለያውን እስከመጨረሻው ማጥፋት ይፈልጋሉ?',
+    deleteConfirm: 'አዎ፣ አጥፋ',
+    privacyPolicy: 'የግላዊነት ፖሊሲ',
     appLanguage: 'የመተግበሪያ ቋንቋ',
     guest: 'እንግዳ',
 
@@ -153,6 +158,11 @@ const strings = {
     currentPassword: 'Current password',
     newPassword: 'New password',
     passwordChanged: 'Your password has been changed.',
+    deleteAccount: 'Delete my account',
+    deleteWarning: 'Your account, comments and saved favorites will be permanently deleted. This cannot be undone.',
+    deleteConfirmTitle: 'Permanently delete your account?',
+    deleteConfirm: 'Yes, delete',
+    privacyPolicy: 'Privacy Policy',
     appLanguage: 'App language',
     guest: 'Guest',
 

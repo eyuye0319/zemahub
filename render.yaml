@@ -23,5 +23,8 @@ services:
         sync: false
       - key: ADMIN_PASSWORD
         sync: false
+      # SHA-256 fingerprint of the Android app signing key (for App Links); set after the first app build.
+      - key: ANDROID_SHA256_FINGERPRINTS
+        sync: false
       - key: ADMIN_NAME
         value: ZemaHub Admin

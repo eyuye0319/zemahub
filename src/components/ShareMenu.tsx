@@ -12,7 +12,7 @@ interface ShareMenuProps {
 }
 
 export function shareUrlFor(type: 'mezmur' | 'film', id: string) {
-  return `${window.location.origin}/?type=${type}&id=${encodeURIComponent(id)}`;
+  return `${window.location.origin}/watch/${type}/${encodeURIComponent(id)}`;
 }
 
 export default function ShareMenu({ media, type, currentLang }: ShareMenuProps) {
