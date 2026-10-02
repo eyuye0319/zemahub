@@ -10,6 +10,10 @@ services:
     buildCommand: npm ci --include=dev && npm run build
     startCommand: node dist/server.cjs
     healthCheckPath: /api/stats
+    # The Android app lives in mobile/; changes there don't need a website redeploy.
+    buildFilter:
+      ignoredPaths:
+        - mobile/**
     envVars:
       - key: NODE_ENV
         value: production
