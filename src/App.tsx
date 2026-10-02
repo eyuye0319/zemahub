@@ -11,7 +11,6 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import MediaPlayerModal from './components/MediaPlayerModal';
 import FavoritesDrawer from './components/FavoritesDrawer';
-import AdminPanel from './components/AdminPanel';
 import AuthModal from './components/AuthModal';
 import { useAuth } from './context/AuthContext';
 import { api } from './lib/api';
@@ -96,7 +95,6 @@ export default function App() {
 
   // 5. Drawers / Modals
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   // 6. Data State
   const [mezmurs, setMezmurs] = useState<Mezmur[]>(initialMezmurs);
@@ -180,25 +178,6 @@ export default function App() {
     }
   };
 
-  // Admin CRUD operations (the server checks the admin session on every call)
-  const adminRequest = async (path: string, method: string, body?: unknown) => {
-    try {
-      await api(path, { method, body });
-    } catch (err) {
-      alert(err instanceof Error ? err.message : String(err));
-      throw err;
-    }
-    await loadData();
-  };
-
-  const handleAddMezmur = (data: any) => adminRequest('/api/mezmur', 'POST', data);
-  const handleUpdateMezmur = (id: string, data: any) => adminRequest(`/api/mezmur/${id}`, 'PUT', data);
-  const handleDeleteMezmur = (id: string) => adminRequest(`/api/mezmur/${id}`, 'DELETE');
-  const handleAddFilm = (data: any) => adminRequest('/api/films', 'POST', data);
-  const handleUpdateFilm = (id: string, data: any) => adminRequest(`/api/films/${id}`, 'PUT', data);
-  const handleDeleteFilm = (id: string) => adminRequest(`/api/films/${id}`, 'DELETE');
-  const handleResetCatalog = () => adminRequest('/api/admin/reset', 'POST');
-
   return (
     <div className="min-h-screen bg-parchment-50 text-charcoal-900 font-sans flex flex-col selection:bg-gold-500 selection:text-burgundy-950">
       
@@ -210,7 +189,7 @@ export default function App() {
         onNavigate={handleNavigate}
         favoritesCount={favorites.length}
         onOpenFavorites={() => setIsFavoritesOpen(true)}
-        onOpenAdmin={() => setIsAdminOpen(true)}
+        onOpenAdmin={() => window.open('/admin', '_blank', 'noopener')}
         allMezmurs={mezmurs}
         allFilms={films}
         onSelectMedia={handleSelectMedia}
@@ -321,24 +300,6 @@ export default function App() {
 
       {/* 6. Sign-in / Registration Modal */}
       <AuthModal currentLang={currentLang} />
-
-      {/* 7. Admin Panel Modal */}
-      <AdminPanel
-        isOpen={isAdminOpen}
-        onClose={() => setIsAdminOpen(false)}
-        currentLang={currentLang}
-        mezmurs={mezmurs}
-        films={films}
-        categories={categories}
-        stats={stats}
-        onAddMezmur={handleAddMezmur}
-        onUpdateMezmur={handleUpdateMezmur}
-        onDeleteMezmur={handleDeleteMezmur}
-        onAddFilm={handleAddFilm}
-        onUpdateFilm={handleUpdateFilm}
-        onDeleteFilm={handleDeleteFilm}
-        onResetCatalog={handleResetCatalog}
-      />
 
     </div>
   );

@@ -214,6 +214,12 @@ function requireAdmin(req: AuthedRequest, res: Response, next: NextFunction) {
 
 app.use("/api", attachUser);
 
+// Keep the admin dashboard out of search engines.
+app.use("/admin", (req, res, next) => {
+  res.set("X-Robots-Tag", "noindex, nofollow");
+  next();
+});
+
 // Simple in-memory brute-force guard for login/register.
 const authAttempts = new Map<string, { count: number; resetAt: number }>();
 function authRateLimit(req: Request, res: Response, next: NextFunction) {
@@ -458,6 +464,7 @@ app.post("/api/mezmur", requireAdmin, (req, res) => {
     descriptionEnglish,
     lyrics,
     duration,
+    sourceChannel,
     featured
   } = req.body;
 
@@ -490,6 +497,7 @@ app.post("/api/mezmur", requireAdmin, (req, res) => {
     duration: duration || "5:00",
     views: 0,
     shares: 0,
+    sourceChannel: sourceChannel || undefined,
     featured: Boolean(featured),
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -636,6 +644,7 @@ app.post("/api/films", requireAdmin, (req, res) => {
     thumbnailUrl,
     descriptionAmharic,
     descriptionEnglish,
+    sourceChannel,
     featured
   } = req.body;
 
@@ -668,6 +677,7 @@ app.post("/api/films", requireAdmin, (req, res) => {
     descriptionEnglish: descriptionEnglish || "",
     views: 0,
     shares: 0,
+    sourceChannel: sourceChannel || undefined,
     featured: Boolean(featured),
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
