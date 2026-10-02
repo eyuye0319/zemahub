@@ -21,10 +21,10 @@ import {
   PublicUser, UserRole, MediaComment
 } from "./src/types";
 import { matchMezmurSearch, matchFilmSearch } from "./src/utils/searchHelper";
+import { createStorage } from "./server/storage";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
-const DB_PATH = process.env.DB_PATH || path.join(process.cwd(), "data", "zemahub_db.json");
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 app.use(express.json({ limit: "1mb" }));
@@ -55,7 +55,7 @@ interface DatabaseSchema {
   comments: MediaComment[];
 }
 
-fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+const storage = createStorage();
 
 // Items created through the admin panel get timestamp ids; everything else comes from the seed.
 const isCustomItem = (item: { id: string }) => /^(mezmur|film)-\d+$/.test(item.id);
@@ -71,15 +71,9 @@ function seedCatalog() {
   };
 }
 
-function loadDB(): DatabaseSchema {
-  let stored: Partial<DatabaseSchema> | null = null;
-  try {
-    if (fs.existsSync(DB_PATH)) {
-      stored = JSON.parse(fs.readFileSync(DB_PATH, "utf-8"));
-    }
-  } catch (error) {
-    console.error("Failed to load persistent ZemaHub DB, seeding initial catalog.", error);
-  }
+// A load failure is fatal on purpose: starting empty would overwrite the stored users and comments.
+async function loadDB(): Promise<DatabaseSchema> {
+  const stored = (await storage.load()) as Partial<DatabaseSchema> | null;
 
   const base: DatabaseSchema = {
     ...seedCatalog(),
@@ -110,11 +104,7 @@ function loadDB(): DatabaseSchema {
 }
 
 function saveDB(data: DatabaseSchema) {
-  try {
-    fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), "utf-8");
-  } catch (error) {
-    console.error("Failed to persist ZemaHub DB", error);
-  }
+  storage.save(data);
 }
 
 // ---------------- AUTH HELPERS ---------------- //
@@ -170,7 +160,8 @@ function startSession(userId: string) {
 const isValidEmail = (email: unknown): email is string =>
   typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-let db = loadDB();
+// Loaded in startServer() before the server accepts requests.
+let db: DatabaseSchema;
 
 // ---------------- AUTH MIDDLEWARE ---------------- //
 
@@ -931,6 +922,9 @@ function injectShareMeta(html: string, req: Request) {
 
 // ---------------- VITE MIDDLEWARE & SERVER START ---------------- //
 async function startServer() {
+  db = await loadDB();
+  console.log(`Storage: ${storage.name}`);
+
   app.use("/api", (req, res) => {
     res.status(404).json({ error: "Not found" });
   });
@@ -965,4 +959,18 @@ async function startServer() {
   });
 }
 
-startServer();
+// Write pending changes before the host stops the process (e.g. Render redeploy or idle spin-down).
+for (const signal of ["SIGTERM", "SIGINT"] as const) {
+  process.on(signal, async () => {
+    try {
+      await storage.flush();
+    } finally {
+      process.exit(0);
+    }
+  });
+}
+
+startServer().catch((error) => {
+  console.error("ZemaHub failed to start:", error);
+  process.exit(1);
+});

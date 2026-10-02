@@ -1,10 +1,11 @@
 # Render Blueprint: https://render.com/docs/blueprint-spec
+# Free plan: the instance has no persistent disk, so accounts & comments are stored in
+# MongoDB (a free MongoDB Atlas cluster) via MONGODB_URI.
 services:
   - type: web
     name: zemahub
     runtime: node
-    # A persistent disk (for accounts & comments) requires a paid instance.
-    plan: starter
+    plan: free
     # --include=dev: the build needs devDependencies (esbuild) even though NODE_ENV=production.
     buildCommand: npm ci --include=dev && npm run build
     startCommand: node dist/server.cjs
@@ -12,15 +13,11 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DB_PATH
-        value: /var/data/zemahub_db.json
+      - key: MONGODB_URI
+        sync: false
       - key: ADMIN_EMAIL
         sync: false
       - key: ADMIN_PASSWORD
         sync: false
       - key: ADMIN_NAME
         value: ZemaHub Admin
-    disk:
-      name: zemahub-data
-      mountPath: /var/data
-      sizeGB: 1

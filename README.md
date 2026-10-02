@@ -21,7 +21,10 @@ A bilingual digital sanctuary dedicated to discovering, searching, streaming, an
 2. Copy `.env.example` to `.env` and set `ADMIN_EMAIL` / `ADMIN_PASSWORD` (the first admin is created on first start).
 3. `npm run dev` and open http://localhost:3000
 
-Runtime data (users, sessions, comments) is stored in `data/zemahub_db.json` (git-ignored).
+Runtime data (users, sessions, comments) is stored in `data/zemahub_db.json` (git-ignored) by default. Set `MONGODB_URI` to store it in MongoDB instead — needed on hosts without a persistent disk.
+
+## Deploying (Render free plan + MongoDB Atlas free)
+`render.yaml` deploys the app on Render's free plan. Create a free MongoDB Atlas cluster, then in Render choose **New → Blueprint**, pick this repository, and fill in `MONGODB_URI`, `ADMIN_EMAIL` and `ADMIN_PASSWORD`. Every `git push` to `main` redeploys.
 
 ## REST API
 Authenticate with `Authorization: Bearer <token>` (returned by register/login). The web app and a future mobile app share the same API.
