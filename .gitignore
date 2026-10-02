@@ -1,0 +1,14 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Runtime database (user accounts, sessions, comments)
+data/
+
+# Local Claude Code settings
+.claude/settings.local.json

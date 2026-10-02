@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Noto Sans Ethiopic", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Noto Serif Ethiopic", "Cinzel", serif;
+  --font-display: "Cinzel", "Noto Serif Ethiopic", serif;
+  --font-amharic: "Noto Sans Ethiopic", sans-serif;
+  
+  --color-burgundy-950: #1c050a;
+  --color-burgundy-900: #300a13;
+  --color-burgundy-800: #4a1521;
+  --color-burgundy-700: #6b1d2f;
+  --color-burgundy-600: #8c1d36;
+  --color-burgundy-500: #ad2746;
+  --color-burgundy-100: #fce7eb;
+  --color-burgundy-50: #fdf2f4;
+
+  --color-gold-300: #f4e3a4;
+  --color-gold-400: #e5c158;
+  --color-gold-500: #d4af37;
+  --color-gold-600: #b89122;
+  --color-gold-700: #8f6f14;
+  --color-gold-800: #684f09;
+  --color-gold-100: #fbf5df;
+  --color-gold-50: #fdfbf3;
+
+  --color-parchment-50: #fdfcfa;
+  --color-parchment-100: #faf7f2;
+  --color-parchment-200: #f3ede2;
+  --color-parchment-300: #ebe0cf;
+  --color-parchment-400: #ded0b9;
+  --color-parchment-500: #caa986;
+
+  --color-charcoal-950: #120e0f;
+  --color-charcoal-900: #1c1618;
+  --color-charcoal-800: #292123;
+  --color-charcoal-700: #3d3235;
+  --color-charcoal-600: #584a4e;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #faf7f2;
+  color: #231a1c;
+}
+
+/* Ethiopian Cross / Manuscript Border Accents */
+.manuscript-border {
+  border-image: repeating-linear-gradient(
+    45deg,
+    #d4af37,
+    #d4af37 6px,
+    #6b1d2f 6px,
+    #6b1d2f 12px
+  ) 1;
+}
+
+.gold-glow {
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.25);
+}
+
+.burgundy-glow {
+  box-shadow: 0 0 25px rgba(107, 29, 47, 0.35);
+}
+
+/* Smooth Ethiopian Theme Accents */
+.ethiopic-pattern {
+  background-color: #2e0811;
+  background-image: linear-gradient(135deg, #24060c 0%, #350912 50%, #1a0307 100%);
+}
+
+.ethiopic-pattern-light {
+  background-color: #faf7f2;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f3ede2;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbb490;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a38965;
+}
+
+/* Hero: drifting wall of mezmur & film thumbnails */
+@keyframes hero-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.hero-marquee {
+  animation: hero-marquee var(--marquee-duration, 90s) linear infinite;
+}
+
+.hero-marquee-reverse {
+  animation-direction: reverse;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-marquee {
+    animation: none;
+  }
+}
+
+/* Gold tilet (ጥለት) woven band — the border pattern of the netela */
+.tilet-band {
+  height: 14px;
+  background-color: #1c050a;
+  background-image:
+    linear-gradient(45deg, transparent 35%, #d4af37 35%, #d4af37 65%, transparent 65%),
+    linear-gradient(-45deg, transparent 35%, #d4af37 35%, #d4af37 65%, transparent 65%),
+    linear-gradient(to bottom, #b89122 0 2px, transparent 2px calc(100% - 2px), #b89122 calc(100% - 2px));
+  background-size: 14px 14px, 14px 14px, 100% 100%;
+  background-position: 0 0, 7px 0, 0 0;
+}

@@ -1,0 +1,6 @@
+{
+  "name": "ZemaHub",
+  "description": "Bilingual Ethiopian Orthodox Christian media platform for discovering Mezmur and Spiritual Films.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
