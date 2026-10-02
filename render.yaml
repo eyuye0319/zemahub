@@ -1,0 +1,26 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: zemahub
+    runtime: node
+    # A persistent disk (for accounts & comments) requires a paid instance.
+    plan: starter
+    # --include=dev: the build needs devDependencies (esbuild) even though NODE_ENV=production.
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: node dist/server.cjs
+    healthCheckPath: /api/stats
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_PATH
+        value: /var/data/zemahub_db.json
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_NAME
+        value: ZemaHub Admin
+    disk:
+      name: zemahub-data
+      mountPath: /var/data
+      sizeGB: 1
