@@ -141,6 +141,10 @@ function createUser(data: DatabaseSchema, name: string, email: string, password:
 
 function ensureAdminAccount(data: DatabaseSchema) {
   if (data.users.some(u => u.role === "admin")) return;
+  if (!process.env.ADMIN_PASSWORD && process.env.NODE_ENV === "production") {
+    // Never create a production admin with the publicly known default password.
+    throw new Error("No admin account exists yet: set ADMIN_EMAIL and ADMIN_PASSWORD.");
+  }
   const email = process.env.ADMIN_EMAIL || "admin@zemahub.app";
   const password = process.env.ADMIN_PASSWORD || "zemahub2026";
   createUser(data, process.env.ADMIN_NAME || "ZemaHub Admin", email, password, "admin");

@@ -3,7 +3,7 @@
 # MongoDB (a free MongoDB Atlas cluster) via MONGODB_URI.
 services:
   - type: web
-    name: zemahub
+    name: zemahub-orthodox
     runtime: node
     plan: free
     # --include=dev: the build needs devDependencies (esbuild) even though NODE_ENV=production.
