@@ -59,8 +59,13 @@
     "scheme": "zemahub",
     "backgroundColor": "#20050B",
     "extra": {
-      "apiUrl": "https://zemahub-orthodox.onrender.com"
+      "apiUrl": "https://zemahub-orthodox.onrender.com",
+      "router": {},
+      "eas": {
+        "projectId": "ac0ca793-1433-42e6-b82c-a8fa45bcb4fd"
+      }
     },
-    "description": "Ethiopian Orthodox Tewahedo mezmur and spiritual films in Amharic and English."
+    "description": "Ethiopian Orthodox Tewahedo mezmur and spiritual films in Amharic and English.",
+    "owner": "wubgzer"
   }
 }
